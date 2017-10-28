@@ -1,0 +1,255 @@
+#STRUCTURE OF sockaddr
+
+struct sockaddr {
+   unsigned short   sa_family;
+   char             sa_data[14];
+};
+________________________________________
+
+#STRUCTURE OF sockaddr_in
+
+struct sockaddr_in {
+   short int            sin_family;
+   unsigned short int   sin_port;
+   struct in_addr       sin_addr;
+   unsigned char        sin_zero[8];
+};
+________________________________________
+
+#STRUCTURE OF in_addr
+
+struct in_addr {
+   unsigned long s_addr;
+};
+________________________________________
+
+#STRUCTURE OF hostent
+
+struct hostent {
+   char *h_name; 
+   char **h_aliases; 
+   int h_addrtype;  
+   int h_length;    
+   char **h_addr_list
+	
+#define h_addr  h_addr_list[0]
+};
+________________________________________
+
+#THE bzero FUNCTION
+
+The bzero function places nbyte null bytes in the string s. This function is used to set all the socket structures with null values.
+
+void bzero(void *s, int nbyte);
+
+This function does not return anything.
+Parameters :
+
+    s − It specifies the string which has to be filled with null bytes. This will be a point to socket structure variable.
+
+    nbyte − It specifies the number of bytes to be filled with null values. This will be the size of the socket structure.
+________________________________________
+
+#THE bcopy FUNCTION
+
+The bcopy function copies nbyte bytes from string s1 to the string s2. Overlapping strings are handled correctly.
+
+void bcopy(const void *s1, void *s2, int nbyte);
+
+This function does not return anything.
+Parameters
+
+    s1 − It specifies the source string.
+
+    s2v − It specifies the destination string.
+
+    nbyte − It specifies the number of bytes to be copied.
+________________________________________
+
+#The socket Function
+
+To perform network I/O, the first thing a process must do is, call the socket function, specifying the type of communication protocol desired and protocol family, etc.
+
+#include <sys/types.h>
+#include <sys/socket.h>
+
+int socket (int family, int type, int protocol);
+
+This call returns a socket descriptor that you can use in later system calls or -1 on error.
+Parameters
+
+family − It specifies the protocol family and is one of the constants shown below −
+Family 	Description
+AF_INET 	IPv4 protocols
+AF_INET6 	IPv6 protocols
+AF_LOCAL 	Unix domain protocols
+AF_ROUTE 	Routing Sockets
+AF_KEY 	Ket socket
+
+This chapter does not cover other protocols except IPv4.
+
+type − It specifies the kind of socket you want. It can take one of the following values −
+Type 	Description
+SOCK_STREAM 	Stream socket
+SOCK_DGRAM 	Datagram socket
+SOCK_SEQPACKET 	Sequenced packet socket
+SOCK_RAW 	Raw socket
+
+protocol − The argument should be set to the specific protocol type given below, or 0 to select the system's default for the given combination of family and type −
+Protocol 	Description
+IPPROTO_TCP 	TCP transport protocol
+IPPROTO_UDP 	UDP transport protocol
+IPPROTO_SCTP 	SCTP transport protocol
+________________________________________
+
+#The connect Function
+
+The connect function is used by a TCP client to establish a connection with a TCP server.
+
+#include <sys/types.h>
+#include <sys/socket.h>
+
+int connect(int sockfd, struct sockaddr *serv_addr, int addrlen);
+
+This call returns 0 if it successfully connects to the server, otherwise it returns -1 on error.
+Parameters
+
+    sockfd − It is a socket descriptor returned by the socket function.
+
+    serv_addr − It is a pointer to struct sockaddr that contains destination IP address and port.
+
+    addrlen − Set it to sizeof(struct sockaddr).
+________________________________________
+
+#The bind Function
+
+The bind function assigns a local protocol address to a socket. With the Internet protocols, the protocol address is the combination of either a 32-bit IPv4 address or a 128-bit IPv6 address, along with a 16-bit TCP or UDP port number. This function is called by TCP server only.
+
+#include <sys/types.h>
+#include <sys/socket.h>
+
+int bind(int sockfd, struct sockaddr *my_addr,int addrlen);
+
+This call returns 0 if it successfully binds to the address, otherwise it returns -1 on error.
+Parameters
+
+    sockfd − It is a socket descriptor returned by the socket function.
+
+    my_addr − It is a pointer to struct sockaddr that contains the local IP address and port.
+
+    addrlen − Set it to sizeof(struct sockaddr).
+
+You can put your IP address and your port automatically
+
+A 0 value for port number means that the system will choose a random port, and INADDR_ANY value for IP address means the server's IP address will be assigned automatically.
+
+server.sin_port = 0;  		     
+server.sin_addr.s_addr = INADDR_ANY;
+
+NOTE − All ports below 1024 are reserved. You can set a port above 1024 and below 65535 unless they are the ones being used by other programs.
+________________________________________
+
+#The listen Function
+
+The listen function is called only by a TCP server and it performs two actions −
+
+    The listen function converts an unconnected socket into a passive socket, indicating that the kernel should accept incoming connection requests directed to this socket.
+
+    The second argument to this function specifies the maximum number of connections the kernel should queue for this socket.
+
+#include <sys/types.h>
+#include <sys/socket.h>
+
+int listen(int sockfd,int backlog);
+
+This call returns 0 on success, otherwise it returns -1 on error.
+Parameters
+
+    sockfd − It is a socket descriptor returned by the socket function.
+
+    backlog − It is the number of allowed connections.
+________________________________________
+
+#The accept Function
+
+The accept function is called by a TCP server to return the next completed connection from the front of the completed connection queue. The signature of the call is as follows −
+
+#include <sys/types.h>
+#include <sys/socket.h>
+
+int accept (int sockfd, struct sockaddr *cliaddr, socklen_t *addrlen);
+
+This call returns a non-negative descriptor on success, otherwise it returns -1 on error. The returned descriptor is assumed to be a client socket descriptor and all read-write operations will be done on this descriptor to communicate with the client.
+Parameters
+
+    sockfd − It is a socket descriptor returned by the socket function.
+
+    cliaddr − It is a pointer to struct sockaddr that contains client IP address and port.
+
+    addrlen − Set it to sizeof(struct sockaddr).
+________________________________________
+
+#The send Function
+
+The send function is used to send data over stream sockets or CONNECTED datagram sockets. If you want to send data over UNCONNECTED datagram sockets, you must use sendto() function.
+
+You can use write() system call to send data. Its signature is as follows −
+
+int send(int sockfd, const void *msg, int len, int flags);
+
+This call returns the number of bytes sent out, otherwise it will return -1 on error.
+Parameters
+
+    sockfd − It is a socket descriptor returned by the socket function.
+
+    msg − It is a pointer to the data you want to send.
+
+    len − It is the length of the data you want to send (in bytes).
+
+    flags − It is set to 0.
+________________________________________
+
+#The recv Function
+
+The recv function is used to receive data over stream sockets or CONNECTED datagram sockets. If you want to receive data over UNCONNECTED datagram sockets you must use recvfrom().
+
+You can use read() system call to read the data. This call is explained in helper functions chapter.
+
+int recv(int sockfd, void *buf, int len, unsigned int flags);
+
+This call returns the number of bytes read into the buffer, otherwise it will return -1 on error.
+Parameters
+
+    sockfd − It is a socket descriptor returned by the socket function.
+
+    buf − It is the buffer to read the information into.
+
+    len − It is the maximum length of the buffer.
+
+    flags − It is set to 0.
+
+The sendto Function
+
+The sendto function is used to send data over UNCONNECTED datagram sockets. Its signature is as follows −
+
+int sendto(int sockfd, const void *msg, int len, unsigned int flags, const struct sockaddr *to, int tolen);
+
+This call returns the number of bytes sent, otherwise it returns -1 on error.
+Parameters
+
+    sockfd − It is a socket descriptor returned by the socket function.
+
+    msg − It is a pointer to the data you want to send.
+
+    len − It is the length of the data you want to send (in bytes).
+
+    flags − It is set to 0.
+
+    to − It is a pointer to struct sockaddr for the host where data has to be sent.
+
+    tolen − It is set it to sizeof(struct sockaddr).
+
+
+
+
+
