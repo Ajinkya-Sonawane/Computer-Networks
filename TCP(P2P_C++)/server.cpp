@@ -19,7 +19,7 @@ using namespace std;
 
 int main(int argc,char *argv[])
 {
-	//TCP PROTOCOL : 0
+	//INTERNET PROTOCOL : 0
 	int PROTOCOL = 0;
 	
 	//TODO: declare socket descriptors ,port variable
